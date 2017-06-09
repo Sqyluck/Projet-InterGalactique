@@ -1,0 +1,36 @@
+<ion-header>
+  <ion-navbar color="color">
+    <ion-title>Paramètres</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+      <ion-card>
+          
+          <ion-item>
+              <ion-label>Vacances</ion-label>
+              <ion-icon name="plane" item-left></ion-icon>
+              <ion-toggle [(ngModel)]="Vacances"></ion-toggle>
+          </ion-item>
+
+          <ion-item>
+              <ion-label>Notifications</ion-label>
+              <ion-icon name="notifications-off" item-left></ion-icon>
+              <ion-toggle [(ngModel)]="Notifications"></ion-toggle>
+          </ion-item>
+
+      </ion-card>
+
+      <ion-fab right bottom>
+          <button ion-fab color="light"><ion-icon name="globe"></ion-icon></button>
+          <ion-fab-list side="left">
+              <button ion-fab><ion-icon name="logo-facebook"></ion-icon></button>
+              <button ion-fab><ion-icon name="logo-twitter"></ion-icon></button>
+              <button ion-fab><ion-icon name="logo-vimeo"></ion-icon></button>
+              <button ion-fab><ion-icon name="logo-googleplus"></ion-icon></button>
+          </ion-fab-list>
+      </ion-fab>
+
+  </ion-list>
+</ion-content>

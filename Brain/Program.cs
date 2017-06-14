@@ -50,7 +50,7 @@ namespace brain2._0
 
         private void Distance_ValueChanged(object sender, StateObjectChangedEventArgs e)
         {
-            if (DoorOpened)
+            if (!DoorOpened)
             {
                 if (!e.IsNew)
                 {
@@ -81,10 +81,12 @@ namespace brain2._0
             if (DoorOpened)
             {
                 DoorOpened = false;
+                PackageHost.WriteInfo("porte fermée");
             }
             else
             {
                 DoorOpened = true;
+                PackageHost.WriteInfo("porte ouverte");
             }
             PackageHost.PushStateObject("doorOpened", DoorOpened);
         }
@@ -92,33 +94,48 @@ namespace brain2._0
         public void UID_ValueChanged(object sender, StateObjectChangedEventArgs e){
 
             PackageHost.WriteInfo(e.NewState.DynamicValue);
-            if (!e.IsNew) {
-                int id = findUser(e.NewState.DynamicValue);
-                if (id != -1) {
-                    changeDoor();
-                    if (DoorOpened) {
-                        if (this.Users[id].client) {
-                            Notifs = new List<Notif>();
-                            pushOnConstellation();
-                        }
-                        else{
-                            Notifs.Add(new Notif("colis", DateTime.Now));
-                            pushOnConstellation();
-                        }
-                    }
-                }
-                else {
-                    PackageHost.PurgeStateObjects("newUser", e.NewState.DynamicValue);
-                }
+            int id = findUser(e.NewState.DynamicValue);
+            if (id != -1) {
+                changeDoor();
+                if (DoorOpened) {
+                    if (this.Users[id].client) {
+                        Notifs = new List<Notif>();
+                        PackageHost.WriteInfo($"{this.Users[id].firstName} {this.Users[id].name} a récupéré le courrier");
+                        pushOnConstellation();
+                     }
+                     else{
+                        Notifs.Add(new Notif("colis", DateTime.Now));
+                        PackageHost.WriteInfo("un colis est arrivé");
+                        pushOnConstellation();
+                     }
+                 }
+             }
+            else {
+                PackageHost.PushStateObject("newUser", e.NewState.DynamicValue);
+                PackageHost.WriteInfo($"badge : {e.NewState.DynamicValue} non connu");
             }
+            
 
         }
 
         [MessageCallback]
         public void AddUser(string uid, Boolean type, string firstName, string name)
         {
-            Users.Add(new User(uid, type, firstName, name));
-            PackageHost.PushStateObject("Users", Users);
+            PackageHost.WriteInfo($"new user :{uid}");
+
+            if (uid == "")
+            {
+                PackageHost.PurgeStateObjects("newUser");
+                PackageHost.WriteInfo("ajout carte abandonné");
+            }
+            else
+            {
+                Users.Add(new User(uid, type, firstName, name));
+                PackageHost.WriteInfo("ajout carte validé");
+
+                PackageHost.PushStateObject("Users", Users);
+            }
+
         }
 
         public int findUser(string uid)

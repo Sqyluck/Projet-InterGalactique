@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { NavController } from 'ionic-angular';
+import { NavController, NavParams } from 'ionic-angular';
 import { AjoutComptePage } from '../AjoutCompte/AjoutCompte';
 
 @Component({
@@ -8,8 +8,7 @@ import { AjoutComptePage } from '../AjoutCompte/AjoutCompte';
   templateUrl: 'about.html'
 })
 export class AboutPage {
-
-  constructor(public navCtrl: NavController) {
+      constructor(public navCtrl: NavController) {
 
     }
 

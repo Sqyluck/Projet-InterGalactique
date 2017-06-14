@@ -8,7 +8,7 @@ import { ToastController } from 'ionic-angular';
 })
 export class AjoutComptePage {
 
-    constructor(private toastCtrl: ToastController) { }
+    constructor(private toastCtrl: ToastController, public navCtrl: NavController) { }
 
     /*todo = {}
     logForm() {
@@ -29,6 +29,8 @@ export class AjoutComptePage {
         });
 
         toast.present();
+
+        this.navCtrl.pop();
     }
 
     /*ionViewDidLoad() {

@@ -4,6 +4,7 @@
 <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/signalr/jquery.signalr-2.2.1.min.js"></script>
 <script type="text/javascript" src="https://cdn.myconstellation.io/js/Constellation-1.8.1.min.js"></script>
 
+
 <html lang="fr" dir="ltr">
 <head>
   <meta charset="UTF-8">
@@ -18,6 +19,19 @@
   
   <!-- cordova.js required for cordova apps -->
   <script src="cordova.js"></script>
+    <script>
+        var constellation = $.signalR.createConstellationConsumer("http://localhost:8088", "123456789", "web");
+        var connecter = false;
+        constellation.connection.stateChanged(function (change) {
+            if (change.newState === $.signalR.connectionState.connected) {
+                console.log("Connecté à constellation");
+                connecter = true;
+            }
+        });
+
+        constellation.connection.start();
+       
+    </script>
         <!--ceci est un commentaire-->
   <!-- un-comment this code to enable service worker
   <script>
@@ -30,40 +44,6 @@
 
   <link href="build/main.css" rel="stylesheet">
 
-    <script type="text/javascript">
-
-        var constellation = $.signalR.createConstellationConsumer("http://localhost:8088", "123456789", "DemoWeb1");
-
-        constellation.connection.stateChanged(function (change) {
-            if (change.newState === $.signalR.connectionState.connected) {
-                console.log("Connecté à constellation");
-
-                constellation.client.registerStateObjectLink("*", "ConstellationPackageConsole1", "Temperature", "*", function (so) {
-                    $("#temp").text(so.Value);
-
-                });
-
-                constellation.client.registerStateObjectLink("*", "HWMonitor", "/hdd/0/load/0", "*", function (so) {
-                    $("#cpu").text(so.Value.Value);
-
-                });
-            }
-        });
-
-        constellation.connection.start();
-
-        $(document).ready(function () {
-
-            $("#Beep").click(function () {
-                constellation.server.sendMessage({ Scope: 'Package', Args: ['ConstellationPackageConsole1'] }, 'Beep', [12000, 1000])
-            });
-
-            $("#lockPC").click(function () {
-                constellation.server.sendMessage({ Scope: 'Package', Args: ['WindowsControl'] }, 'LockWorkStation', {})
-            });
-        });
-
-</script>
 </head>
 <body>
 

@@ -17,16 +17,15 @@ namespace brain2._0
         private List<User> Users;
         private List<Notif> Notifs;
 
-        [StateObjectLink("ESP8266_Package", "distance")]
-        public StateObjectNotifier Distance { get; set; }
+        //[StateObjectLink("ESP8266_Package", "distance")]
+       // public StateObjectNotifier Distance { get; set; }
 
         [StateObjectLink("ESP8266_Package", "badge")]
         public StateObjectNotifier UID { get; set; }
 
-        private int nextTime = -1;
+        public DateTime nextTime = new DateTime();
 
-        Boolean ActivateMotor = false;
-
+        public Boolean ActivateMotor = false;
 
 
         static void Main(string[] args)
@@ -39,11 +38,11 @@ namespace brain2._0
             PackageHost.WriteInfo("Package starting - IsRunning: {0} - IsConnected: {1}", PackageHost.IsRunning, PackageHost.IsConnected);
             Users = new List<User>();
             Notifs = new List<Notif>();
+            nextTime = DateTime.Now;
             this.loadUsers();
-            this.Distance.ValueChanged += Distance_ValueChanged;
+            //this.Distance.ValueChanged += Distance_ValueChanged;
             this.UID.ValueChanged += UID_ValueChanged;
             initializeStateObject();
-
             while (PackageHost.IsRunning)
             {
 
@@ -66,15 +65,17 @@ namespace brain2._0
         public void loadUsers()
         {
             string line;
-            StreamReader file = new StreamReader(@"C:\Luc\cours\CIR 3\Constellation\brain\brain\UsersSave.txt");
-            while((line = file.ReadLine())!= null)
+            string url = @"C:\Luc\cours\CIR 3\Constellation\brain\brain\UsersSave.txt";
+
+            StreamReader file = new StreamReader(url);
+            while ((line = file.ReadLine()) != null)
             {
                 string uid = line;
                 string client = file.ReadLine();
                 Boolean b;
                 string firstName = file.ReadLine();
                 string name = file.ReadLine();
-                if(client == "True")
+                if (client == "True")
                 {
                     b = true;
                 }
@@ -82,7 +83,7 @@ namespace brain2._0
                 {
                     b = false;
                 }
-                Users.Add(new User(uid, b , firstName, name));
+                Users.Add(new User(uid, b, firstName, name));
             }
         }
         public void saveUsers() {
@@ -99,31 +100,48 @@ namespace brain2._0
 
             file.Close();
         }
-        private void Distance_ValueChanged(object sender, StateObjectChangedEventArgs e)
+
+        [MessageCallback]
+        public void Message()
         {
-            if (!ActivateMotor)
+            if(nextTime.AddSeconds(50) < DateTime.Now)
             {
-                if (!e.IsNew)
-                {
-                    if (e.OldState.IsExpired)
-                    {
-                        PackageHost.WriteInfo("du courrier est arrivé");
-                        Notifs.Add(new Notif("post", DateTime.Now));
-                        pushOnConstellation();
-                    }
-                }
-                else
-                {
-                    PackageHost.WriteInfo("du courrier est arrivé");
-                    Notifs.Add(new Notif("post", DateTime.Now));
-                    pushOnConstellation();
-                }
+                PackageHost.WriteInfo("du courrier est arrivé");
+                Thread.Sleep(50);
+                Notifs.Add(new Notif("Courrier", DateTime.Now));
+                PackageHost.PushStateObject("Notification", Notifs);
             }
+            nextTime = DateTime.Now;
+
+
         }
 
-       
+        /*  private void Distance_ValueChanged(object sender, StateObjectChangedEventArgs e)
+          {
+              if (!ActivateMotor)
+              {
+                  if (!e.IsNew)
+                  {
+                      if (e.OldState.IsExpired)
+                      {
+                          PackageHost.WriteInfo("du courrier est arrivé");
+                          Notifs.Add(new Notif("post", DateTime.Now));
+                          pushOnConstellation();
+                      }
+                  }
+                  else
+                  {
+                      PackageHost.WriteInfo("du courrier est arrivé");
+                      Notifs.Add(new Notif("post", DateTime.Now));
+                      pushOnConstellation();
+                  }
+              }
+          }*/
+
+
         public void pushOnConstellation()
         {
+
             PackageHost.PushStateObject("Notification", Notifs);
         }
 
@@ -142,7 +160,7 @@ namespace brain2._0
             PackageHost.PushStateObject("ActivateMotor", ActivateMotor);
         }
 
-        public void UID_ValueChanged(object sender, StateObjectChangedEventArgs e){
+        public void UID_ValueChanged(object sender, StateObjectChangedEventArgs e) {
 
             PackageHost.WriteInfo(e.NewState.DynamicValue);
             int id = findUser(e.NewState.DynamicValue);
@@ -153,29 +171,37 @@ namespace brain2._0
                         Notifs = new List<Notif>();
                         PackageHost.WriteInfo($"{this.Users[id].firstName} {this.Users[id].name} a récupéré le courrier");
                         pushOnConstellation();
-                     }
-                     else{
+                    }
+                    else {
                         Notifs.Add(new Notif("colis", DateTime.Now));
                         PackageHost.WriteInfo("un colis est arrivé");
                         pushOnConstellation();
-                     }
-                 }
-             }
+                    }
+                }
+            }
             else {
                 PackageHost.PushStateObject("newUser", e.NewState.DynamicValue);
                 PackageHost.WriteInfo($"badge : {e.NewState.DynamicValue} non connu");
             }
-            
+
 
         }
 
         [MessageCallback]
         public void AddUser(string uid, Boolean type, string firstName, string name)
         {
-                Users.Add(new User(uid, type, firstName, name));
-                PackageHost.WriteInfo("ajout carte validé");
-                PackageHost.PushStateObject("Users", Users);
+            Users.Add(new User(uid, type, firstName, name));
+            PackageHost.WriteInfo("ajout carte validé");
+            PackageHost.PushStateObject("Users", Users);
+            PackageHost.PurgeStateObjects("newUsers");
+
             saveUsers();
+        }
+
+        [MessageCallback]
+        public void UnacceptUser(string uid)
+        {
+            PackageHost.PurgeStateObjects("newUsers");
         }
 
         [MessageCallback]

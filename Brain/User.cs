@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace brain2._0
+namespace Brain
 {
     class User
     {
@@ -12,6 +12,7 @@ namespace brain2._0
         public Boolean client;
         public string name;
         public string firstName;
+        //client :  true=client     false=facteur
         public User(string uid, Boolean client, string firstName, string name) {
             this.uid = uid;
             this.client = client;

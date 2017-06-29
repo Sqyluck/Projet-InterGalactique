@@ -4,17 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace brain2._0
+namespace Brain
 {
     class Notif
     {
-        public string type;
+        public Boolean type;
         public int year;
         public int month;
         public int day;
         public int hour;
         public int minute;
-        public Notif(string type, DateTime date)
+        //type :  true=courrier     false=colis
+        public Notif( Boolean type, DateTime date)
         {
             this.type = type;
             this.year = date.Year;
